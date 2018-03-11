@@ -47,11 +47,11 @@ def flip_unfair_coin(n):
 
 
 if __name__ == '__main__':
+    # Test out the raster data generation
     n = 100
     max = 500
 
     data = generate_correlated_raster(n, max)
-    # data = generate_random_raster(n, max)
 
     plt.imshow(data, interpolation='nearest',
                extent=[0.5, 0.5 + n, 0.5, 0.5 + n],
