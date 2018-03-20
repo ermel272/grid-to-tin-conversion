@@ -10,9 +10,10 @@ class Tin(object):
 
 
 class Triangle(object):
-    def __init__(self, edges):
-        assert len(edges) == 3, "A triangle must be defined by exactly three edges."
-        self.edges = edges
+    def __init__(self, p1, p2, p3):
+        self.p1 = p1
+        self.p2 = p2
+        self.p3 = p3
 
 
 class Edge(object):
@@ -22,13 +23,14 @@ class Edge(object):
 
 
 class Point(object):
-    def __init__(self, x, y):
+    def __init__(self, x, y, value=None):
         self.x = x
         self.y = y
         self.v = np.array([
             [x],
             [y]
         ])
+        self.value = value
 
     def __str__(self):
         return '({}, {})'.format(self.x, self.y)
