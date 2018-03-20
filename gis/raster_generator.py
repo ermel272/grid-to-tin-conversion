@@ -6,10 +6,26 @@ from math import floor
 
 
 def generate_random_raster(n, maximum):
+    """
+    Generates a raster of dimension (n x n) with grid value at most param maximum.
+    All raster values are random.
+
+    :param n: The grid height of the raster.
+    :param maximum: The maximum value of a particular raster cell.
+    :return: A (n x n) raster in list format.
+    """
     return [[randint(0, maximum) for _ in range(0, n)] for _ in range(0, n)]
 
 
 def generate_correlated_raster(n, maximum):
+    """
+    Generates a raster of dimension (n x n) with grid value at most param maximum.
+    The algorithm attempts to correlate previous cell values to new ones.
+
+    :param n: The grid height of the raster.
+    :param maximum: The maximum value of a particular raster cell.
+    :return: A (n x n) raster in list format.
+    """
     correlation_width = int(floor(maximum / 10))
     raster = [list() for _ in range(0, n)]
     raster[0].append(randint(0, maximum))
@@ -48,12 +64,12 @@ def flip_unfair_coin(n):
 
 if __name__ == '__main__':
     # Test out the raster data generation
-    n = 100
+    n = 1000
     max = 500
 
-    data = generate_correlated_raster(n, max)
+    raster = generate_correlated_raster(n, max)
 
-    plt.imshow(data, interpolation='nearest',
+    plt.imshow(raster, interpolation='nearest',
                extent=[0.5, 0.5 + n, 0.5, 0.5 + n],
                cmap='gist_earth')
     plt.show()
