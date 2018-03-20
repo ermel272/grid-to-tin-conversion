@@ -15,6 +15,19 @@ class Triangle(object):
         self.p2 = p2
         self.p3 = p3
 
+    def __str__(self):
+        return '({}, {}, {})'.format(str(self.p1), str(self.p2), str(self.p3))
+
+    def __hash__(self):
+        return hash((str(self.p1), str(self.p2), str(self.p3)))
+
+    def __eq__(self, other):
+        return True if self.p1 == other.p1 and self.p2 == other.p2 and self.p3 == other.p3 else False
+
+    def contains(self, p):
+        # TODO: implement
+        return True
+
 
 class Edge(object):
     def __init__(self, p1, p2):

@@ -1,3 +1,4 @@
+from gis.graph import DirectedAcyclicGraph
 from gis.tin import Point, Triangle
 
 
@@ -18,11 +19,43 @@ def delaunay_triangulation(p):
     """
     p_0 = __find_highest_point(p)
     p_minus1, p_minus2 = __find_binding_points(p_0)
+
+    # Construct initial triangulation and point location DAG
     t = [Triangle(p_0, p_minus1, p_minus2)]
+    dag = DirectedAcyclicGraph()
+    dag.add_vertex(t[0])
 
     random_perm = p.difference({p_0})
     for point in random_perm:
-        pass
+        t = insert_point(t, point, dag)
+
+    # TODO: Remove binding points, p_minus1 and p_minus2
+    return t
+
+
+def insert_point(t, p, dag):
+    """
+    Given a Delaunay Triangulation t, inserts the new point p
+    and readjusts the Delaunay Triangulation.
+
+    Note: Assumes that the point p is contained within a triangle of t.
+
+    :param dag: The DAG representing the history of the triangulation.
+    :param t: The list of triangles representing the DT.
+    :param p: The point being added to the DT.
+    :return: A new list of triangles.
+    """
+    def __find_triangle(p, dag):
+        curr = dag.root
+
+        # Traverse graph until the end
+        while curr.num_edges() != 0:
+            for triangle in curr.points:
+                if triangle.contains(p):
+                    curr = dag.graph.get(str(triangle))
+                    break
+
+        return curr
 
 
 def __find_highest_point(p):
