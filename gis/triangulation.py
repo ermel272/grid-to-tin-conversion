@@ -55,7 +55,7 @@ def insert_point(t, p, dag):
                     curr = dag.graph.get(str(triangle))
                     break
 
-        return curr
+        return curr.from_pt
 
 
 def __find_highest_point(p):

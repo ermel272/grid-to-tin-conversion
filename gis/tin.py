@@ -53,3 +53,13 @@ class Point(object):
 
     def __eq__(self, other):
         return True if self.x == other.x and self.y == other.y else False
+
+
+def right_turn(p1, p2, p3):
+    """
+    Determines if p1 -> p2 -> p3 is a right turn.
+
+    Note: Counts three points on the same line as a right turn.
+    """
+    det = (p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x)
+    return det >= 0
