@@ -1,5 +1,5 @@
 from gis.graph import DirectedAcyclicGraph
-from gis.tin import Point, Triangle
+from gis.tin import Point, Triangle, Edge
 
 
 def delaunay_triangulation(p):
@@ -21,9 +21,10 @@ def delaunay_triangulation(p):
     p_minus1, p_minus2 = __find_binding_points(p_0)
 
     # Construct initial triangulation and point location DAG
-    t = [Triangle(p_0, p_minus1, p_minus2)]
+    first_tri = Triangle(p_0, p_minus1, p_minus2)
+    t = {str(first_tri): first_tri}
     dag = DirectedAcyclicGraph()
-    dag.add_vertex(t[0])
+    dag.add_vertex(first_tri)
 
     random_perm = p.difference({p_0})
     for point in random_perm:
@@ -41,7 +42,7 @@ def insert_point(t, p, dag):
     Note: Assumes that the point p is contained within a triangle of t.
 
     :param dag: The DAG representing the history of the triangulation.
-    :param t: The list of triangles representing the DT.
+    :param t: The dict of triangles representing the DT.
     :param p: The point being added to the DT.
     :return: A new list of triangles.
     """
@@ -56,6 +57,35 @@ def insert_point(t, p, dag):
                     break
 
         return curr.from_pt
+
+    tri = __find_triangle(p, dag)
+    edge = tri.is_on_edge(p)
+
+    if not edge:
+        # Create three new triangles, replacing tri in triangulation dict
+        t1 = Triangle(tri.p1, tri.p2, p)
+        t2 = Triangle(tri.p2, tri.p3, p)
+        t3 = Triangle(tri.p3, tri.p1, p)
+        del t[str(tri)]
+        t[str(t1)] = t1
+        t[str(t2)] = t2
+        t[str(t3)] = t3
+
+        # Update the DAG
+        dag.add_edge(tri, t1)
+        dag.add_edge(tri, t2)
+        dag.add_edge(tri, t3)
+
+        # Readjust for Delaunay legality
+        legalize_edge(p, t1.e1, t, dag)
+        legalize_edge(p, t2.e1, t, dag)
+        legalize_edge(p, t3.e1, t, dag)
+    else:
+        pass
+
+
+def legalize_edge(p, edge, t, dag):
+    pass
 
 
 def __find_highest_point(p):
@@ -90,5 +120,5 @@ def __find_binding_points(point):
     :return: Two points that create a triangle with the input point around the
         entire pointset.
     """
-    return Point(point.x, point.y - (2 * point.y)), \
-           Point(point.x - (2 * point.x), point.y - (2 * point.y))
+    return Point(point.x + 1, point.y - (3 * point.y)), \
+        Point(point.x - (3 * point.x), point.y - (3 * point.y))
