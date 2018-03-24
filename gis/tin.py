@@ -32,6 +32,17 @@ class Grid(object):
 
         return new_grid, points
 
+    def convert_to_raster(self):
+        raster = list()
+        for i in range(0, self.width):
+            raster.append(list())
+            for j in range(0, self.height):
+                pt = self.grid[i][j]
+                value = pt.estimate if pt.estimate else pt.value
+                raster[i].append(value)
+
+        return raster
+
 
 class Triangle(object):
     def __init__(self, p1, p2, p3):
@@ -41,6 +52,7 @@ class Triangle(object):
         self.e1 = Edge(p1, p2)
         self.e2 = Edge(p2, p3)
         self.e3 = Edge(p3, p1)
+        self.points = list()
 
     def __str__(self):
         return '({}, {}, {})'.format(str(self.p1), str(self.p2), str(self.p3))
@@ -91,6 +103,8 @@ class Point(object):
             [y]
         ])
         self.value = value
+        self.estimate = None
+        self.error = None
         self.array = [self.x, self.y]
 
     def __str__(self):
@@ -114,6 +128,10 @@ class Point(object):
                 return edge.p2.y <= self.y <= edge.p1.y
 
         return False
+
+    def reset_estimates(self):
+        self.estimate = None
+        self.error = None
 
 
 def right_turn(p1, p2, p3):

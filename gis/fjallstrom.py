@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
 
 from gis.raster_generator import generate_correlated_raster
-from gis.tin import Grid
+from gis.tin import Grid, Point, Triangle
 
 
 def convert_to_tin(grid, error):
@@ -17,57 +17,82 @@ def convert_to_tin(grid, error):
     """
     assert 0 <= error <= 1, "Maximum error must be between 0 and 1."
 
-    # Compute set S of boundary points
+    # Compute set S of boundary point_array
     s = {
         grid.get(0, 0),
         grid.get(grid.width - 1, 0),
         grid.get(0, grid.height - 1),
         grid.get(grid.width - 1, grid.height - 1)
     }
-    p = grid.points.difference(s)
+    point_set = grid.points.difference(s)
 
-    # Create initial triangulation of the set S of points
-    points = np.array([pt.array for pt in s])
-    dt = Delaunay(np.array(points))
+    def distribute_points(changed_points, triangles):
+        """
+        Distributes the set of change_points of Point objects into the dictionary triangles
+        of newly instantiated Triangle objects.
+        """
+        for point in changed_points:
+            simplex = dt.find_simplex(np.array([(point.x, point.y)]))
+            triangle_pts = point_array[dt.simplices[simplex]]
+            triangle = triangles[get_triangle_key(triangle_pts[0])]
+            triangle.points.append(point)
 
-    def __update_error(point):
-        simplex = dt.find_simplex(np.array([(point.x, point.y)]))
-        triangle = points[dt.simplices[simplex]]
+            # Get the points defining the triangle from the grid
+            p1 = grid.get(triangle_pts[0][0][0], triangle_pts[0][0][1])
+            p2 = grid.get(triangle_pts[0][1][0], triangle_pts[0][1][1])
+            p3 = grid.get(triangle_pts[0][2][0], triangle_pts[0][2][1])
 
-        # Get the points defining the triangle from the grid
-        p1 = grid.get(triangle[0][0][0], triangle[0][0][1])
-        p2 = grid.get(triangle[0][1][0], triangle[0][1][1])
-        p3 = grid.get(triangle[0][2][0], triangle[0][2][1])
+            estimation = estimate_point_in_triangle(point, p1, p2, p3)
+            point.error = abs((estimation - point.value) / point.value)
+            point.estimate = estimation
 
-        estimation = estimate_point_in_triangle(point, p1, p2, p3)
-        error = estimation / point.value
-
-        return error
+    # Create initial triangulation and distribute points to triangles
+    point_array = np.array([pt.array for pt in s])
+    dt = Delaunay(point_array)
+    tri_coords = point_array[dt.simplices]
+    triangles = create_triangles(tri_coords)
+    distribute_points(point_set, triangles)
 
     while True:
         worst = None
         worst_error = 0
 
         # Find point of P with biggest error
-        for point in p:
-            pt_error = __update_error(point)
-            if not worst or pt_error > worst_error:
+        for point in point_set:
+            if not worst or point.error > worst_error:
                 worst = point
-                worst_error = pt_error
+                worst_error = point.error
 
-        if worst_error <= error:
+        if worst_error <= error or len(point_set) == 0:
             break
 
-        # Remove worst point from P
-        p = p.difference({worst})
+        # Remove worst point from P and retriangulate
+        point_set = point_set.difference({worst})
+        worst.reset_estimates()
         s.add(worst)
-        points = np.array([pt.array for pt in s])
-        dt = Delaunay(np.array(points))
+        point_array = np.array([pt.array for pt in s])
+        dt = Delaunay(np.array(point_array))
+        tri_coords = point_array[dt.simplices]
+        old_triangles = triangles
+        triangles = create_triangles(tri_coords)
 
-        # Plot the triangulation
-        # plt.triplot(points[:, 0], points[:, 1], dt.simplices.copy())
-        # plt.plot(points[:, 0], points[:, 1], 'o')
-        # plt.show()
+        # Figure out which triangles are new and which have been deleted
+        deleted_keys = {key for key in old_triangles.keys() if key not in triangles.keys()}
+        removable_keys = {key for key in triangles.keys() if key in old_triangles.keys() and key not in deleted_keys}
+
+        # Replace triangles that have not been modified
+        for key in removable_keys:
+            del triangles[key]
+            triangles[key] = old_triangles[key]
+
+        # Find all the points from the deleted triangles
+        changed_points = list()
+        for key in deleted_keys:
+            triangle = old_triangles[key]
+            changed_points += triangle.points
+
+        # Distribute the changed_points into the triangles
+        distribute_points(changed_points, triangles)
 
     return dt
 
@@ -97,15 +122,46 @@ def area_of_triangle(p1, p2, p3):
     return np.linalg.det(matrix) * 0.5
 
 
+def create_triangles(tri_coords):
+    """
+    Creates a dictionary of triangles given their coordinates.
+    """
+    triangles = dict()
+    for coord in tri_coords:
+        p1 = Point(coord[0][0], coord[0][1])
+        p2 = Point(coord[1][0], coord[1][1])
+        p3 = Point(coord[2][0], coord[2][1])
+        triangles[get_triangle_key(coord)] = Triangle(p1, p2, p3)
+
+    return triangles
+
+
+def get_triangle_key(coord):
+    """
+    Turns a triangles point coordinates into a one-dimensional string key.
+    """
+    return "({}, {}), ({}, {}), ({}, {})".format(
+        coord[0][0], coord[0][1],
+        coord[1][0], coord[1][1],
+        coord[2][0], coord[2][1]
+    )
+
+
 if __name__ == '__main__':
     # Test out the raster data generation
-    n = 10
+    n = 20
     max = 500
 
     raster = generate_correlated_raster(n, max)
     grid = Grid(raster)
-    dt = convert_to_tin(grid, 0.1)
+    dt = convert_to_tin(grid, 0.3)
 
+    plt.imshow(raster, interpolation='nearest',
+               extent=[0.5, 0.5 + n, 0.5, 0.5 + n],
+               cmap='gist_earth')
+    plt.show()
+
+    raster = grid.convert_to_raster()
     plt.imshow(raster, interpolation='nearest',
                extent=[0.5, 0.5 + n, 0.5, 0.5 + n],
                cmap='gist_earth')
