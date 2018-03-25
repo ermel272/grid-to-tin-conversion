@@ -7,15 +7,15 @@ from gis.raster_generator import generate_correlated_raster
 from gis.tin import Grid, Point, Triangle
 
 
-def convert_to_tin(grid, error):
+def convert_to_tin(grid, max_error):
     """
     Converts the input grid into a TIN object with maximum error specified by param error.
 
-    :param error: The maximum error allowed in the converted TIN.
+    :param max_error: The maximum error allowed in the converted TIN.
     :param grid: A grid object.
     :return: An initialized TIN object.
     """
-    assert 0 <= error <= 1, "Maximum error must be between 0 and 1."
+    assert 0 <= max_error <= 1, "Maximum error must be between 0 and 1."
 
     # Compute set S of boundary point_array
     s = {
@@ -53,17 +53,14 @@ def convert_to_tin(grid, error):
     triangles = create_triangles(tri_coords)
     distribute_points(point_set, triangles)
 
+    # Create initially sorted list of point error values
+    error_array = [pt for pt in point_set]
+    error_array.sort(key=lambda elem: elem.error)
+
     while True:
-        worst = None
-        worst_error = 0
-
         # Find point of P with biggest error
-        for point in point_set:
-            if not worst or point.error > worst_error:
-                worst = point
-                worst_error = point.error
-
-        if worst_error <= error or len(point_set) == 0:
+        worst = error_array.pop()
+        if worst.error <= max_error or len(point_set) == 0:
             break
 
         # Remove worst point from P and retriangulate
@@ -93,6 +90,7 @@ def convert_to_tin(grid, error):
 
         # Distribute the changed_points into the triangles
         distribute_points(changed_points, triangles)
+        error_array.sort(key=lambda elem: elem.error)
 
     return dt
 
@@ -149,7 +147,7 @@ def get_triangle_key(coord):
 
 if __name__ == '__main__':
     # Test out the raster data generation
-    n = 20
+    n = 100
     max = 500
 
     raster = generate_correlated_raster(n, max)
@@ -163,6 +161,6 @@ if __name__ == '__main__':
 
     raster = grid.convert_to_raster()
     plt.imshow(raster, interpolation='nearest',
-               extent=[0.5, 0.5 + n, 0.5, 0.5 + n],
+               extent=[0, 0 + n, 0, 0 + n],
                cmap='gist_earth')
     plt.show()

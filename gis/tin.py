@@ -103,8 +103,8 @@ class Point(object):
             [y]
         ])
         self.value = value
-        self.estimate = None
-        self.error = None
+        self.estimate = 0
+        self.error = 0
         self.array = [self.x, self.y]
 
     def __str__(self):
@@ -130,8 +130,8 @@ class Point(object):
         return False
 
     def reset_estimates(self):
-        self.estimate = None
-        self.error = None
+        self.estimate = 0
+        self.error = 0
 
 
 def right_turn(p1, p2, p3):
