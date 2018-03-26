@@ -38,7 +38,7 @@ class Grid(object):
             raster.append(list())
             for j in range(0, self.height):
                 pt = self.grid[i][j]
-                value = pt.estimate if pt.estimate else pt.value
+                value = pt.estimate if pt.error > 0 else pt.value
                 raster[i].append(value)
 
         return raster
@@ -114,7 +114,7 @@ class Point(object):
         return hash((self.x, self.y))
 
     def __eq__(self, other):
-        return True if self.x == other.x and self.y == other.y else False
+        return True if (self.x == other.x and self.y == other.y) else False
 
     def is_on_edge(self, edge):
         if self.y == (edge.slope * self.x) + edge.y_int:
@@ -129,7 +129,7 @@ class Point(object):
 
         return False
 
-    def reset_estimates(self):
+    def reset_values(self):
         self.estimate = 0
         self.error = 0
 

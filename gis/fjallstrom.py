@@ -42,6 +42,7 @@ def convert_to_tin(grid, max_error):
             p2 = grid.get(triangle_pts[0][1][0], triangle_pts[0][1][1])
             p3 = grid.get(triangle_pts[0][2][0], triangle_pts[0][2][1])
 
+            # Edit the points estimation and error values
             estimation = estimate_point_in_triangle(point, p1, p2, p3)
             point.error = abs((estimation - point.value) / point.value)
             point.estimate = estimation
@@ -58,14 +59,13 @@ def convert_to_tin(grid, max_error):
     error_array.sort(key=lambda elem: elem.error)
 
     while True:
-        # Find point of P with biggest error
         worst = error_array.pop()
         if worst.error <= max_error or len(point_set) == 0:
             break
 
         # Remove worst point from P and retriangulate
         point_set = point_set.difference({worst})
-        worst.reset_estimates()
+        worst.reset_values()
         s.add(worst)
         point_array = np.array([pt.array for pt in s])
         dt = Delaunay(np.array(point_array))
@@ -89,10 +89,12 @@ def convert_to_tin(grid, max_error):
             changed_points += triangle.points
 
         # Distribute the changed_points into the triangles
+        changed_points.remove(worst)
         distribute_points(changed_points, triangles)
+
         error_array.sort(key=lambda elem: elem.error)
 
-    return dt
+    return triangles
 
 
 def estimate_point_in_triangle(p, t1, t2, t3):
@@ -147,19 +149,20 @@ def get_triangle_key(coord):
 
 if __name__ == '__main__':
     # Test out the raster data generation
-    n = 100
+    n = 40
     max = 500
 
     raster = generate_correlated_raster(n, max)
     grid = Grid(raster)
     dt = convert_to_tin(grid, 0.3)
 
+    plt.figure()
     plt.imshow(raster, interpolation='nearest',
-               extent=[0.5, 0.5 + n, 0.5, 0.5 + n],
+               extent=[0, 0 + n, 0, 0. + n],
                cmap='gist_earth')
-    plt.show()
 
     raster = grid.convert_to_raster()
+    plt.figure()
     plt.imshow(raster, interpolation='nearest',
                extent=[0, 0 + n, 0, 0 + n],
                cmap='gist_earth')

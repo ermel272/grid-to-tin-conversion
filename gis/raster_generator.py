@@ -14,7 +14,7 @@ def generate_random_raster(n, maximum):
     :param maximum: The maximum value of a particular raster cell.
     :return: A (n x n) raster in list format.
     """
-    return [[randint(0, maximum) for _ in range(0, n)] for _ in range(0, n)]
+    return [[randint(1, maximum) for _ in range(0, n)] for _ in range(0, n)]
 
 
 def generate_correlated_raster(n, maximum):
@@ -28,16 +28,16 @@ def generate_correlated_raster(n, maximum):
     """
     correlation_width = int(floor(maximum / 10))
     raster = [list() for _ in range(0, n)]
-    raster[0].append(randint(0, maximum))
+    raster[0].append(randint(1, maximum))
 
     # Populate first line of data
     for i in range(1, n):
         if not flip_unfair_coin(n * 8):
             # Correlate raster point to previous point
             new = raster[0][i - 1] + randint(-correlation_width, correlation_width)
-            raster[0].append(0 if new < 0 else maximum if new > maximum else new)
+            raster[0].append(1 if new <= 0 else maximum if new > maximum else new)
         else:
-            raster[0].append(randint(0, maximum))
+            raster[0].append(randint(1, maximum))
 
     # Generate the rest of the raster
     for i in range(1, n):
@@ -50,9 +50,9 @@ def generate_correlated_raster(n, maximum):
                     prev = int(floor((raster[i][j - 1] + raster[i - 1][j]) / 2))
 
                 new = prev + randint(-correlation_width, correlation_width)
-                raster[i].append(0 if new < 0 else maximum if new > maximum else new)
+                raster[i].append(1 if new <= 0 else maximum if new > maximum else new)
             else:
-                raster[i].append(randint(0, maximum))
+                raster[i].append(randint(1, maximum))
 
     return raster
 
