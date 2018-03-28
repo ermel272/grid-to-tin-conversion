@@ -1,8 +1,11 @@
 from __future__ import division
-import matplotlib.pyplot as plt
-from random import randint
 
 from math import floor
+from random import randint
+
+import matplotlib.pyplot as plt
+
+from gis.utils import flip_unfair_coin
 
 
 def generate_random_raster(n, maximum):
@@ -55,11 +58,6 @@ def generate_correlated_raster(n, maximum):
                 raster[i].append(randint(1, maximum))
 
     return raster
-
-
-def flip_unfair_coin(n):
-    assert n >= 2
-    return True if randint(1, n) == 1 else False
 
 
 if __name__ == '__main__':

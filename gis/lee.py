@@ -13,6 +13,8 @@ def lee_convert(grid, max_error):
     :param grid: A grid object.
     :return: An initialized TIN object.
     """
+    assert 0 <= max_error <= 1, "Maximum error must be between 0 and 1."
+
     # Create initial triangulation and distribute points to triangles
     point_array = np.array([pt.array for pt in grid.points])
     dt = Delaunay(point_array)
