@@ -13,7 +13,7 @@ if __name__ == '__main__':
     im = Image.open('cdem_dem_031G.tif')
     # start = randint(0, 2500)
     # imarray = np.array(im)[start:start + 500, start:start + 500]
-    imarray = np.array(im)[200:400, 200:400]
+    imarray = np.array(im)[1000:1400, 1000:1400]
     grid = Grid(imarray)
 
     start_time = time.time()

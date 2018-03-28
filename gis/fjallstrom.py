@@ -54,12 +54,13 @@ def convert_to_tin(grid, max_error):
     triangles = create_triangles(tri_coords)
     distribute_points(point_set, triangles)
 
-    # Create initially sorted list of point error values
-    error_array = [pt for pt in point_set]
-    error_array.sort(key=lambda elem: elem.error)
+    # Create structured list of point error values
+    error_array = np.array([pt for pt in point_set])
+    error_array = np.array(sorted(error_array, key=lambda elem: elem.error))
 
     while True:
-        worst = error_array.pop()
+        worst = error_array[-1]
+        error_array = error_array[:-1]
         if worst.error <= max_error or len(point_set) == 0:
             break
 
@@ -92,7 +93,7 @@ def convert_to_tin(grid, max_error):
         changed_points.remove(worst)
         distribute_points(changed_points, triangles)
 
-        error_array.sort(key=lambda elem: elem.error)
+        error_array = np.array(sorted(error_array, key=lambda elem: elem.error))
 
     return triangles
 
