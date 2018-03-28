@@ -28,15 +28,18 @@ class Tin(object):
 
         return False
 
-    def distribute_points(self, points):
+    def distribute_points(self, points, remove=None):
         """
         Distributes some points into the Triangles to which they belong.
         """
         for point in points:
+            if remove and remove == point:
+                continue
+
             simplex = self.dt.find_simplex(np.array([(point.x, point.y)]))
             triangle_pts = self.triangulation_pts[self.dt.simplices[simplex]]
             triangle = self.triangles[Triangle.get_triangle_key(triangle_pts[0])]
-            triangle.points.append(point)
+            triangle.points = np.append(triangle.points, [point])
 
             # Get the points defining the triangle from the grid
             p1 = self.grid.get(triangle_pts[0][0][0], triangle_pts[0][0][1])
@@ -68,7 +71,7 @@ class Triangle(object):
         self.p1 = p1
         self.p2 = p2
         self.p3 = p3
-        self.points = list()
+        self.points = np.array([])
 
     def __str__(self):
         return '({}, {}, {})'.format(str(self.p1), str(self.p2), str(self.p3))

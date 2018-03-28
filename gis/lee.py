@@ -1,5 +1,6 @@
 import numpy as np
-from scipy.spatial.qhull import Delaunay
+
+from gis.tin import Tin
 
 
 def lee_convert(grid, max_error):
@@ -15,6 +16,9 @@ def lee_convert(grid, max_error):
     """
     assert 0 <= max_error <= 1, "Maximum error must be between 0 and 1."
 
-    # Create initial triangulation and distribute points to triangles
-    point_array = np.array([pt.array for pt in grid.points])
-    dt = Delaunay(point_array)
+    # Ensure algorithm does not remove corners so that triangles will always be able to interpolate
+    non_removable_points = grid.get_corner_set()
+    triangulation_points = grid.points.difference(non_removable_points)
+
+    # Create initial Tin on all points of the grid
+    tin = Tin(np.array(triangulation_points), grid)

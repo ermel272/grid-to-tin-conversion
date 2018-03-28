@@ -38,11 +38,10 @@ def fjallstrom_convert(grid, max_error):
         worst = error_array[-1]
         error_array = error_array[:-1]
 
-        if worst.error <= max_error or len(estimated_points) == 0:
+        if worst.error <= max_error or error_array.size == 0:
             break
 
         # Move the worst point from the estimated set to the set of points forming the triangulation
-        estimated_points = estimated_points.difference({worst})
         triangulation_points = np.append(triangulation_points, [worst.array], axis=0)
         worst.reset_error()
 
@@ -59,14 +58,13 @@ def fjallstrom_convert(grid, max_error):
             tin.replace_triangle(key, old_tin.get_triangle(key))
 
         # Find all the points with changed error values from the deleted triangles
-        changed_points = list()
+        changed_points = np.array([])
         for key in deleted_keys:
             triangle = old_tin.get_triangle(key)
-            changed_points += triangle.points
+            changed_points = np.append(changed_points, triangle.points)
 
         # Distribute the changed points into the triangles & resort the error array
-        changed_points.remove(worst)
-        tin.distribute_points(changed_points)
+        tin.distribute_points(changed_points, remove=worst)
         error_array = np.sort(error_array)
 
     return tin
