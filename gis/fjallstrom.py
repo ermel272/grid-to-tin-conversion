@@ -7,9 +7,12 @@ from gis.raster_generator import generate_correlated_raster
 from gis.tin import Grid, Point, Triangle
 
 
-def convert_to_tin(grid, max_error):
+def fjallstrom_convert(grid, max_error):
     """
     Converts the input grid into a TIN object with maximum error specified by param error.
+
+    The algorithm implemented can be seen in "Algorithms for the All-nearest Neighbors Problem"
+    by Per-Olof Fjallstrom.
 
     :param max_error: The maximum error allowed in the converted TIN.
     :param grid: A grid object.
@@ -55,18 +58,20 @@ def convert_to_tin(grid, max_error):
     distribute_points(point_set, triangles)
 
     # Create structured list of point error values
-    error_array = np.array([pt for pt in point_set])
-    error_array = np.array(sorted(error_array, key=lambda elem: elem.error))
+    error_array = np.sort(np.array([pt for pt in point_set]))
 
     while True:
+        # Pop point with highest error off of the top
         worst = error_array[-1]
         error_array = error_array[:-1]
+
+        # Halting condition
         if worst.error <= max_error or len(point_set) == 0:
             break
 
         # Remove worst point from P and retriangulate
         point_set = point_set.difference({worst})
-        worst.reset_values()
+        worst.reset_error()
         s.add(worst)
         point_array = np.array([pt.array for pt in s])
         dt = Delaunay(np.array(point_array))
@@ -93,7 +98,7 @@ def convert_to_tin(grid, max_error):
         changed_points.remove(worst)
         distribute_points(changed_points, triangles)
 
-        error_array = np.array(sorted(error_array, key=lambda elem: elem.error))
+        error_array = np.sort(error_array)
 
     return triangles
 
@@ -150,12 +155,12 @@ def get_triangle_key(coord):
 
 if __name__ == '__main__':
     # Test out the raster data generation
-    n = 40
+    n = 30
     max = 500
 
     raster = generate_correlated_raster(n, max)
     grid = Grid(raster)
-    dt = convert_to_tin(grid, 0.3)
+    dt = fjallstrom_convert(grid, 0.3)
 
     plt.figure()
     plt.imshow(raster, interpolation='nearest',

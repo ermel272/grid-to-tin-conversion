@@ -6,7 +6,7 @@ from PIL import Image
 import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
 
-from gis.fjallstrom import convert_to_tin
+from gis.fjallstrom import fjallstrom_convert
 from gis.tin import Grid
 
 if __name__ == '__main__':
@@ -17,7 +17,7 @@ if __name__ == '__main__':
     grid = Grid(imarray)
 
     start_time = time.time()
-    dt = convert_to_tin(grid, 0.3)
+    dt = fjallstrom_convert(grid, 0.3)
     print("--- %s seconds ---" % (time.time() - start_time))
 
     plt.figure()
