@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from gis.raster_generator import generate_correlated_raster
-from gis.tin import Grid, Tin
+from gis.tin import Tin
+from gis.grid import Grid
 
 
 def fjallstrom_convert(grid, max_error):

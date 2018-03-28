@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
 
 from gis.fjallstrom import fjallstrom_convert
-from gis.tin import Grid
+from gis.grid import Grid
 
 if __name__ == '__main__':
     im = Image.open('cdem_dem_031G.tif')
