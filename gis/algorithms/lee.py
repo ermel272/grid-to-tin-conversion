@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from gis.grid import Grid
-from gis.raster_generator import generate_correlated_raster
-from gis.tin import Tin
+from gis.data_structures.grid import Grid
+from gis.data_structures.tin import Tin
+from gis.utils.raster_generator import generate_correlated_raster
 
 
 def lee_convert(grid, max_error):

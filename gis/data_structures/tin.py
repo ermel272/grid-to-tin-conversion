@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.spatial.qhull import Delaunay
 
-from gis.utils import estimate_point_in_triangle
+from gis.utils.utility_functions import estimate_point_in_triangle
 
 
 class Tin(object):

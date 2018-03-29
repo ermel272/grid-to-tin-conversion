@@ -1,6 +1,6 @@
 import numpy as np
 
-from gis.tin import Point
+from gis.data_structures.tin import Point
 
 
 class Grid(object):

@@ -1,11 +1,12 @@
-import numpy as np
 import time
-from PIL import Image
+
 import matplotlib.pyplot as plt
+import numpy as np
+from PIL import Image
 from matplotlib.colors import Normalize
 
-from gis.fjallstrom import fjallstrom_convert
-from gis.grid import Grid
+from gis.algorithms.fjallstrom import fjallstrom_convert
+from gis.data_structures.grid import Grid
 
 if __name__ == '__main__':
     im = Image.open('cdem_dem_031G.tif')
