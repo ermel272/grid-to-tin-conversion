@@ -62,12 +62,6 @@ def generate_correlated_raster(n, maximum):
 
 if __name__ == '__main__':
     # Test out the raster data generation
-    n = 1000
-    max = 500
-
-    raster = generate_correlated_raster(n, max)
-
-    plt.imshow(raster, interpolation='nearest',
-               extent=[0.5, 0.5 + n, 0.5, 0.5 + n],
-               cmap='gist_earth')
+    raster = generate_correlated_raster(100, 500)
+    plt.imshow(raster, extent=[0, 0 + n, 0, 0 + n], cmap='gist_earth')
     plt.show()
