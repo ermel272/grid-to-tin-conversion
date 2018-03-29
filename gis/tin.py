@@ -41,15 +41,22 @@ class Tin(object):
             triangle = self.triangles[Triangle.get_triangle_key(triangle_pts[0])]
             triangle.points = np.append(triangle.points, [point])
 
-            # Get the points defining the triangle from the grid
-            p1 = self.grid.get(triangle_pts[0][0][0], triangle_pts[0][0][1])
-            p2 = self.grid.get(triangle_pts[0][1][0], triangle_pts[0][1][1])
-            p3 = self.grid.get(triangle_pts[0][2][0], triangle_pts[0][2][1])
+            self.compute_point_error(point, triangle_pts[0])
 
-            # Edit the points estimation and error values
-            estimation = estimate_point_in_triangle(point, p1, p2, p3)
-            point.error = abs((estimation - point.value) / point.value)
-            point.estimate = estimation
+    def compute_point_error(self, point, triangle_pts):
+        """
+        Updates a points error value based on a list of triangle point coordinates using
+        barycentric-coordinate interpolation.
+        """
+        # Get the points defining the triangle from the grid
+        p1 = self.grid.get(triangle_pts[0][0], triangle_pts[0][1])
+        p2 = self.grid.get(triangle_pts[1][0], triangle_pts[1][1])
+        p3 = self.grid.get(triangle_pts[2][0], triangle_pts[2][1])
+
+        # Edit the points estimation and error values
+        estimation = estimate_point_in_triangle(point, p1, p2, p3)
+        point.error = abs((estimation - point.value) / point.value)
+        point.estimate = estimation
 
     @staticmethod
     def __init_triangles(tri_coords):
@@ -64,6 +71,29 @@ class Tin(object):
             triangles[Triangle.get_triangle_key(coord)] = Triangle(p1, p2, p3)
 
         return triangles
+
+    def compute_hypothetical_errors(self):
+        """
+        Computes the hypothetical errors of each point in the TIN, if they were to be removed.
+        """
+        indices, indptr = self.dt.vertex_neighbor_vertices
+
+        for pt_index in range(0, self.dt.points.shape[0]):
+            current_vertex = self.dt.points[pt_index]
+            point = self.grid.get(current_vertex[0], current_vertex[1])
+
+            if point in self.grid.get_corner_set():
+                continue
+
+            # Find neighboring vertices of the vertex at pt_index & create hypothetical triangulation
+            neighbor_indeces = indptr[indices[pt_index]:indices[pt_index+1]]
+            neighbor_vertices = self.dt.points[neighbor_indeces]
+            hypothetical_triangulation = Delaunay(neighbor_vertices)
+
+            # Locate current point in new triangulation & compute error
+            simplex = hypothetical_triangulation.find_simplex(current_vertex)
+            triangle_pts = hypothetical_triangulation.points[hypothetical_triangulation.simplices[simplex]]
+            self.compute_point_error(point, triangle_pts)
 
 
 class Triangle(object):

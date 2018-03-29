@@ -1,3 +1,5 @@
+import numpy as np
+
 from gis.tin import Point
 
 
@@ -9,7 +11,7 @@ class Grid(object):
 
     def get(self, x, y):
         assert x <= self.width - 1 and y <= self.height - 1
-        return self.grid[x][y]
+        return self.grid[int(x)][int(y)]
 
     def get_corner_set(self):
         return {
@@ -30,7 +32,7 @@ class Grid(object):
                 new_grid[i].append(new_pt)
                 points.add(new_pt)
 
-        return new_grid, points
+        return np.array(new_grid), points
 
     def convert_to_raster(self):
         raster = list()
@@ -41,4 +43,4 @@ class Grid(object):
                 value = pt.estimate if pt.error > 0 else pt.value
                 raster[i].append(value)
 
-        return raster
+        return np.array(raster)
