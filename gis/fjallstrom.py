@@ -33,12 +33,12 @@ def fjallstrom_convert(grid, max_error):
     # Create list of points sorted by error value in ascending order
     error_array = np.sort(np.array([pt for pt in estimated_points]))
 
-    while True:
+    while error_array.size > 0:
         # Pop point with highest error off of the top
         worst = error_array[-1]
         error_array = error_array[:-1]
 
-        if worst.error <= max_error or error_array.size == 0:
+        if worst.error <= max_error:
             break
 
         # Move the worst point from the estimated set to the set of points forming the triangulation

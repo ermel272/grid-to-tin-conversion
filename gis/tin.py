@@ -72,13 +72,13 @@ class Tin(object):
 
         return triangles
 
-    def compute_hypothetical_errors(self):
+    def compute_hypothetical_errors(self, point_indeces):
         """
         Computes the hypothetical errors of each point in the TIN, if they were to be removed.
         """
         indices, indptr = self.dt.vertex_neighbor_vertices
 
-        for pt_index in range(0, self.dt.points.shape[0]):
+        for pt_index in point_indeces:
             current_vertex = self.dt.points[pt_index]
             point = self.grid.get(current_vertex[0], current_vertex[1])
 
@@ -87,8 +87,14 @@ class Tin(object):
 
             # Find neighboring vertices of the vertex at pt_index & create hypothetical triangulation
             neighbor_indeces = indptr[indices[pt_index]:indices[pt_index+1]]
-            neighbor_vertices = self.dt.points[neighbor_indeces]
-            hypothetical_triangulation = Delaunay(neighbor_vertices)
+            neighbors = self.dt.points[neighbor_indeces]
+            hypothetical_triangulation = Delaunay(neighbors)
+
+            # Store neighbor point data in the point for later
+            point_neighbors = set()
+            for pt in neighbors:
+                point_neighbors.add(self.grid.get(pt[0], pt[1]))
+            point.neighbors = point_neighbors
 
             # Locate current point in new triangulation & compute error
             simplex = hypothetical_triangulation.find_simplex(current_vertex)
@@ -135,7 +141,10 @@ class Point(object):
         self.value = value
         self.estimate = 0
         self.error = 0
-        self.array = [self.x, self.y]
+        self.array = np.array([self.x, self.y])
+
+        # Used for Lee's algorithm
+        self.neighbors = None
 
     def __str__(self):
         return '({}, {})'.format(self.x, self.y)

@@ -28,18 +28,33 @@ def lee_convert(grid, max_error):
     tin = Tin(triangulation_points, grid)
 
     # Compute errors of points if they were to be removed from the triangulation
-    tin.compute_hypothetical_errors()
+    tin.compute_hypothetical_errors(range(0, triangulation_points.shape[0]))
     error_array = np.sort(error_array)
 
-    while True:
+    while error_array.size > 0:
         # Take point with smallest error off the front
         best = error_array[0]
         error_array = error_array[1:]
+        triangulation_points = np.append([pt.array for pt in error_array],
+                                         [pt.array for pt in non_removable_points], axis=0)
 
-        if best.error >= max_error or error_array.size == 0:
+        if best.error >= max_error:
             break
 
+        # Retriangulate & find indeces of the points neighbors in new tin
+        tin = Tin(triangulation_points, grid)
 
+        i = 0
+        indices = list()
+        for pt in tin.dt.points:
+            pt = grid.get(pt[0], pt[1])
+            if pt in best.neighbors:
+                indices.append(i)
+            i += 1
+
+        # Recompute error values & sort
+        tin.compute_hypothetical_errors(indices)
+        error_array = np.sort(error_array)
 
     return tin
 
@@ -51,7 +66,7 @@ if __name__ == '__main__':
 
     raster = generate_correlated_raster(n, max)
     grid = Grid(raster)
-    dt = lee_convert(grid, 0.3)
+    dt = lee_convert(grid, 0.05)
 
     plt.figure()
     plt.imshow(raster, interpolation='nearest',
