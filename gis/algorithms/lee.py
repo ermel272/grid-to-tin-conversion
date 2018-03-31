@@ -6,18 +6,20 @@ from gis.data_structures.tin import Tin
 from gis.utils.raster_generator import generate_correlated_raster
 
 
-def lee_convert(grid, max_error):
+def lee_convert(raster, max_error):
     """
-    Converts the input grid into a TIN object with maximum error specified by param error.
+    Converts the input raster into a TIN object with maximum error specified by param error.
 
     The algorithm implemented can be seen in "Coverage and Visibility Problems on Topographic Surfaces"
     by Jay Lee.
 
     :param max_error: The maximum error allowed in the converted TIN.
-    :param grid: A grid object.
+    :param raster: A two dimensional array of numbers
     :return: An initialized TIN object.
     """
     assert 0 <= max_error <= 1, "Maximum error must be between 0 and 1."
+
+    grid = Grid(raster)
 
     # Ensure algorithm does not remove corners so that triangles will always be able to interpolate
     non_removable_points = grid.get_corner_set()
@@ -41,7 +43,7 @@ def lee_convert(grid, max_error):
         if best.error >= max_error:
             break
 
-        # Retriangulate & find indeces of the points neighbors in new tin
+        # Retriangulate & find indices of the points neighbors in new tin
         tin = Tin(triangulation_points, grid)
 
         i = 0
@@ -56,7 +58,7 @@ def lee_convert(grid, max_error):
         tin.compute_hypothetical_errors(indices)
         error_array = np.sort(error_array)
 
-    return tin
+    return tin, grid
 
 
 if __name__ == '__main__':
@@ -65,8 +67,7 @@ if __name__ == '__main__':
     max = 500
 
     raster = generate_correlated_raster(n, max)
-    grid = Grid(raster)
-    dt = lee_convert(grid, 0.05)
+    dt, grid = lee_convert(raster, 0.05)
 
     plt.figure()
     plt.imshow(raster, interpolation='nearest',

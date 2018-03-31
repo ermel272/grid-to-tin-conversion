@@ -8,18 +8,20 @@ from gis.data_structures.tin import Tin
 from gis.utils.raster_generator import generate_correlated_raster
 
 
-def fjallstrom_convert(grid, max_error):
+def fjallstrom_convert(raster, max_error):
     """
-    Converts the input grid into a TIN object with maximum error specified by param error.
+    Converts the input raster into a TIN object with maximum error specified by param error.
 
     The algorithm implemented can be seen in "Algorithms for the All-nearest Neighbors Problem"
     by Per-Olof Fjallstrom.
 
     :param max_error: The maximum error allowed in the converted TIN.
-    :param grid: A grid object.
+    :param raster: A two-dimensional array of numbers.
     :return: An initialized TIN object.
     """
     assert 0 <= max_error <= 1, "Maximum error must be between 0 and 1."
+
+    grid = Grid(raster)
 
     # Take the boundary points as the initial triangulation point set
     initial_tri_set = grid.get_corner_set()
@@ -67,7 +69,7 @@ def fjallstrom_convert(grid, max_error):
         tin.distribute_points(changed_points, remove=worst)
         error_array = np.sort(error_array)
 
-    return tin
+    return tin, grid
 
 
 if __name__ == '__main__':
@@ -76,8 +78,7 @@ if __name__ == '__main__':
     max = 500
 
     raster = generate_correlated_raster(n, max)
-    grid = Grid(raster)
-    dt = fjallstrom_convert(grid, 0.3)
+    dt, grid = fjallstrom_convert(raster, 0.3)
 
     plt.figure()
     plt.imshow(raster, interpolation='nearest',
