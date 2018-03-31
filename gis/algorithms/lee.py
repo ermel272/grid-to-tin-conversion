@@ -58,6 +58,10 @@ def lee_convert(raster, max_error):
         tin.compute_hypothetical_errors(indices)
         error_array = np.sort(error_array)
 
+    # Reset estimates for points that are being used in the TIN
+    for pt in error_array:
+        pt.reset_error()
+
     return tin, grid
 
 
@@ -67,7 +71,9 @@ if __name__ == '__main__':
     max = 500
 
     raster = generate_correlated_raster(n, max)
-    dt, grid = lee_convert(raster, 0.05)
+    dt, grid = lee_convert(raster, 0.30)
+
+    print grid.average_error()
 
     plt.figure()
     plt.imshow(raster, interpolation='nearest',

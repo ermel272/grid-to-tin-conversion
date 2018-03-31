@@ -34,6 +34,14 @@ class Grid(object):
 
         return np.array(new_grid), points
 
+    def average_error(self):
+        total_error = 0
+        for row in self.grid:
+            for point in row:
+                total_error += point.error
+
+        return total_error / (self.width * self.height)
+
     def convert_to_raster(self):
         raster = list()
         for i in range(0, self.width):

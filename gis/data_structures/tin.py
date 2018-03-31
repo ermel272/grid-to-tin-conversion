@@ -55,6 +55,7 @@ class Tin(object):
 
         # Edit the points estimation and error values
         estimation = estimate_point_in_triangle(point, p1, p2, p3)
+
         point.error = abs((estimation - point.value) / point.value)
         point.estimate = estimation
 
