@@ -5,7 +5,7 @@ from random import randint
 
 import matplotlib.pyplot as plt
 
-from utility_functions import flip_unfair_coin
+from gis.utils.utility_functions import flip_unfair_coin
 
 
 def generate_random_raster(n, maximum):
