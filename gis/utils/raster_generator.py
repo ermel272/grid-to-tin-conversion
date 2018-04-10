@@ -58,10 +58,3 @@ def generate_correlated_raster(n, maximum):
                 raster[i].append(randint(1, maximum))
 
     return raster
-
-
-if __name__ == '__main__':
-    # Test out the raster data generation
-    raster = generate_correlated_raster(100, 500)
-    plt.imshow(raster, extent=[0, 100, 0, 100], cmap='gist_earth')
-    plt.show()

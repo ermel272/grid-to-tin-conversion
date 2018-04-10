@@ -67,26 +67,3 @@ def lee_convert(raster, max_error):
         pt.reset_error()
 
     return tin, grid
-
-
-if __name__ == '__main__':
-    # Test out the raster conversion
-    n = 30
-    max = 500
-
-    raster = generate_correlated_raster(n, max)
-    dt, grid = lee_convert(raster, 0.30)
-
-    print grid.average_error()
-
-    plt.figure()
-    plt.imshow(raster, interpolation='nearest',
-               extent=[0, 0 + n, 0, 0. + n],
-               cmap='gist_earth')
-
-    raster = grid.convert_to_raster()
-    plt.figure()
-    plt.imshow(raster, interpolation='nearest',
-               extent=[0, 0 + n, 0, 0 + n],
-               cmap='gist_earth')
-    plt.show()

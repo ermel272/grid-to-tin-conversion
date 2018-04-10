@@ -49,20 +49,3 @@ def combined_convert(raster, max_error):
 
     # Return both the tin and grid from the winning algorithm
     return result[0], result[1]
-
-
-if __name__ == '__main__':
-    # Test out the raster conversion
-    n = 4
-    max = 500
-
-    raster = generate_correlated_raster(n, max)
-    dt, grid = combined_convert(raster, 0.3)
-
-    plt.figure()
-    plt.imshow(raster, extent=[0, 0 + n, 0, 0. + n], cmap='gist_earth')
-
-    raster = grid.convert_to_raster()
-    plt.figure()
-    plt.imshow(raster, extent=[0, 0 + n, 0, 0 + n], cmap='gist_earth')
-    plt.show()
