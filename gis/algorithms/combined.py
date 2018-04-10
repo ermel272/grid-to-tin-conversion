@@ -1,9 +1,22 @@
 import matplotlib.pyplot as plt
-from multiprocessing import Process, Queue
+import sys
+from multiprocessing import Process, Manager
 
 from gis.algorithms.fjallstrom import fjallstrom_convert
 from gis.algorithms.lee import lee_convert
 from gis.utils.raster_generator import generate_correlated_raster
+
+
+def run_lee(queue, raster, max_error):
+    sys.setrecursionlimit(4000)
+    tin, grid = lee_convert(raster, max_error)
+    queue.put([tin, grid])
+
+
+def run_fjallstrom(queue, raster, max_error):
+    sys.setrecursionlimit(4000)
+    tin, grid = fjallstrom_convert(raster, max_error)
+    queue.put([tin, grid])
 
 
 def combined_convert(raster, max_error):
@@ -18,7 +31,7 @@ def combined_convert(raster, max_error):
     :param raster: A two dimensional array of numbers
     :return: An initialized TIN object.
     """
-    q = Queue()
+    q = Manager().Queue()
     p1 = Process(target=run_lee, args=(q, raster, max_error,))
     p2 = Process(target=run_fjallstrom, args=(q, raster, max_error,))
 
@@ -38,23 +51,13 @@ def combined_convert(raster, max_error):
     return result[0], result[1]
 
 
-def run_lee(queue, raster, max_error):
-    tin, grid = lee_convert(raster, max_error)
-    queue.put([tin, grid])
-
-
-def run_fjallstrom(queue, raster, max_error):
-    tin, grid = fjallstrom_convert(raster, max_error)
-    queue.put([tin, grid])
-
-
 if __name__ == '__main__':
     # Test out the raster conversion
-    n = 30
+    n = 4
     max = 500
 
     raster = generate_correlated_raster(n, max)
-    dt, grid = combined_convert(raster, 0.1)
+    dt, grid = combined_convert(raster, 0.3)
 
     plt.figure()
     plt.imshow(raster, extent=[0, 0 + n, 0, 0. + n], cmap='gist_earth')

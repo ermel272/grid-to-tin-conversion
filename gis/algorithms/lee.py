@@ -37,8 +37,12 @@ def lee_convert(raster, max_error):
         # Take point with smallest error off the front
         best = error_array[0]
         error_array = error_array[1:]
-        triangulation_points = np.append([pt.array for pt in error_array],
-                                         [pt.array for pt in non_removable_points], axis=0)
+
+        if error_array.size == 0:
+            triangulation_points = np.array([pt.array for pt in non_removable_points])
+        else:
+            triangulation_points = np.append([pt.array for pt in error_array],
+                                             [pt.array for pt in non_removable_points], axis=0)
 
         if best.error >= max_error:
             break
