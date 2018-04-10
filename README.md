@@ -32,3 +32,14 @@ convert(sidelength=30, algorithm='fjallstrom', error=0.3)
 inputs are 'fjallstrom' and 'lee'.
 - The error parameter controls the maximum error for interpolation on the generated TIN. As
 this value approaches zero, the runtime of the conversion approaches infinity.
+
+#### Examples
+
+Here is an example of a 30 x 30 Raster Image converted at 40% Maximum Error using the 
+Fjallstrom Algorithm:
+
+![original]
+![converted]
+
+[original]: examples/original.png
+[converted]: examples/converted.png
