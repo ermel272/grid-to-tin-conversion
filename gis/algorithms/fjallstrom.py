@@ -78,16 +78,20 @@ if __name__ == '__main__':
     max = 500
 
     raster = generate_correlated_raster(n, max)
-    dt, grid = fjallstrom_convert(raster, 0.3)
+    dt, grid = fjallstrom_convert(raster, 0.5)
 
     plt.figure()
     plt.imshow(raster, interpolation='nearest',
                extent=[0, 0 + n, 0, 0. + n],
                cmap='gist_earth')
+    plt.xticks([])
+    plt.yticks([])
 
     raster = grid.convert_to_raster()
     plt.figure()
     plt.imshow(raster, interpolation='nearest',
                extent=[0, 0 + n, 0, 0 + n],
                cmap='gist_earth')
+    plt.xticks([])
+    plt.yticks([])
     plt.show()
