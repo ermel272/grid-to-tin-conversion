@@ -2,8 +2,8 @@
 
 This project implements two known Raster (grid) to Triangle Irregular Network (TIN) 
 converstion algorithms. The goal of the project is to compare the speed and error
-performance of both algorithms. The results of the experimentation can be seen in
-**paper.pdf**. The project was written with **Python 2.7**.
+performance of both algorithms. The results of the experimentation can be seen [here][paper]. 
+The project was written with Python 2.7.
 
 ### Installation
 In the project root directory, run the following command:
@@ -43,3 +43,4 @@ Fjallstrom Algorithm:
 
 [original]: examples/original.png
 [converted]: examples/converted.png
+[paper]: https://github.com/ermel272/grid-to-tin-conversion/blob/master/paper.pdf
