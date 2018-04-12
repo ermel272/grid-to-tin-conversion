@@ -1,7 +1,7 @@
 # Grid to TIN Conversion
 
 This project implements two known Raster (grid) to Triangle Irregular Network (TIN) 
-converstion algorithms. The goal of the project is to compare the speed and error
+conversion algorithms. The goal of the project is to compare the speed and error
 performance of both algorithms. The results of the experimentation can be seen [here][paper]. 
 The project was written with Python 2.7.
 
